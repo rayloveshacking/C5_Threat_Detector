@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const RegisterView(),
+      home: const HomeView(),  //Replace with RegisterView.
     );
   }
 }

@@ -1,23 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/qr_code_scanner.dart';
 
-class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
-  _HomeViewState createState() =>  _HomeViewState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: HomeView(),
+    );
+  }
 }
 
-class  _HomeViewState extends State <HomeView> {
-
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
-      body: const Center(
-        child: Text('Welcome to the Home Page!'),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('No result'),
+            ElevatedButton(
+              child: const Text('Scan QR code'),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => QrCodeScanner(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -40,7 +40,26 @@ class ApiServices {
       throw Exception('Failed to scan the URL with VirusTotal');
     }
   }
+
+  Future<int> checkQrCodeUrl(String url) async {
+    final urlScanReport = Uri.https('www.virustotal.com', '/vtapi/v2/url/report');
+    final response = await http.post(urlScanReport, body: {
+      'apikey': virusTotalApiKey,
+      'resource': url,
+    });
+
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body);
+      return result['positives'] ?? 0;  // Return the number of positives
+    } else {
+      throw Exception('Failed to check URL with VirusTotal');
+    }
+  }
 }
+
+
+
+
 
 
 

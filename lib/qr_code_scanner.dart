@@ -21,13 +21,17 @@ class _ScanCodePageState extends State<ScanCodePage> {
 
       String safetyMessage;
       bool isSafe = false;
+      double safetyPercentage = 0.0;
 
-      if (positives > 2) {
-        safetyMessage = "The URL is unsafe. Proceed with caution.";
+      if (positives > 1) {
+        safetyMessage = "Unsafe: The URL has been flagged by multiple sources.";
       } else if (positives == 1) {
-        safetyMessage = "The URL is moderately safe.";
+        safetyPercentage = 80.0;
+        safetyMessage = "Moderate: The URL has been flagged by one source. Safety: $safetyPercentage%";
+        isSafe = true;
       } else {
-        safetyMessage = "The URL is safe.";
+        safetyPercentage = 100.0;
+        safetyMessage = "Safe: The URL appears to be safe. Safety: $safetyPercentage%";
         isSafe = true;
       }
 
@@ -133,6 +137,7 @@ class _ScanCodePageState extends State<ScanCodePage> {
     );
   }
 }
+
 
 
 

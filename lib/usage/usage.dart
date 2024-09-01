@@ -14,76 +14,81 @@ class _HomeViewState extends State<HomeView> {
   final TextEditingController _linkController = TextEditingController();
   final ApiServices _apiServices = ApiServices();
 
-  void verifyLink() async {
-    final String url = _linkController.text;
+void verifyLink() async {
+  final String url = _linkController.text;
 
-    if (url.isEmpty) {
-      _showMessage("Please enter a URL.");
-      return;
-    }
-
-    // Validate the URL format
-    final Uri? uri = Uri.tryParse(url);
-    if (uri == null || !uri.hasScheme) {
-      _showMessage("Invalid URL format.");
-      return;
-    }
-
-    try {
-      final scanResult = await _apiServices.checkUrlVirusTotal(url);
-      int positives = scanResult['positives'] ?? 0;
-
-      String safetyMessage;
-      bool isSafe = false;
-
-      if (positives > 2) {
-        safetyMessage = "Unsafe: The URL has been flagged by multiple sources.";
-      } else if (positives == 1) {
-        safetyMessage = "Moderate: The URL has been flagged by one source.";
-      } else {
-        safetyMessage = "Safe: The URL appears to be safe.";
-        isSafe = true;
-      }
-
-      // Show dialog with the result message and proceed option if safe
-      await _showSafetyDialog(context, uri, safetyMessage, isSafe);
-
-    } catch (e) {
-      _showMessage("Error verifying URL: $e");
-    }
+  if (url.isEmpty) {
+    _showMessage("Please enter a URL.");
+    return;
   }
 
-  Future<void> _showSafetyDialog(BuildContext context, Uri uri, String message, bool isSafe) async {
-    await showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('URL Safety Check'),
-          content: Text(message),
-          actions: <Widget>[
+  // Validate the URL format
+  final Uri? uri = Uri.tryParse(url);
+  if (uri == null || !uri.hasScheme) {
+    _showMessage("Invalid URL format.");
+    return;
+  }
+
+  try {
+    final scanResult = await _apiServices.checkUrlVirusTotal(url);
+    int positives = scanResult['positives'] ?? 0;
+
+    String safetyMessage;
+    bool isSafe = false;
+    double safetyPercentage = 0.0;
+
+    if (positives > 1) {
+      safetyMessage = "Unsafe: The URL has been flagged by multiple sources.";
+    } else if (positives == 1) {
+      safetyPercentage = 80.0;
+      safetyMessage = "Moderate: The URL has been flagged by one source. Safety: $safetyPercentage%";
+      isSafe = true;
+    } else {
+      safetyPercentage = 100.0;
+      safetyMessage = "Safe: The URL appears to be safe. Safety: $safetyPercentage%";
+      isSafe = true;
+    }
+
+    // Show dialog with the result message and proceed option if safe
+    await _showSafetyDialog(context, uri, safetyMessage, isSafe);
+
+  } catch (e) {
+    _showMessage("Error verifying URL: $e");
+  }
+}
+
+Future<void> _showSafetyDialog(BuildContext context, Uri uri, String message, bool isSafe) async {
+  await showDialog<void>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('URL Safety Check'),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          if (isSafe)
             TextButton(
-              child: const Text('Close'),
-              onPressed: () {
+              child: Text('Proceed to ${uri.toString()}'),
+              onPressed: () async {
                 Navigator.of(context).pop();
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  _showMessage("Could not launch $uri");
+                }
               },
             ),
-            if (isSafe)
-              TextButton(
-                child: Text('Proceed to ${uri.toString()}'),
-                onPressed: () async {
-                  Navigator.of(context).pop();
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  } else {
-                    _showMessage("Could not launch $uri");
-                  }
-                },
-              ),
-          ],
-        );
-      },
-    );
-  }
+        ],
+      );
+    },
+  );
+}
+
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));

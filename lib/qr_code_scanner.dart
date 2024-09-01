@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/usage/usage.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter_application_1/apicalls.dart';
-import 'package:url_launcher/url_launcher.dart';  // Import url_launcher
+import 'package:url_launcher/url_launcher.dart';
 
 class ScanCodePage extends StatefulWidget {
   const ScanCodePage({super.key});
@@ -19,31 +19,60 @@ class _ScanCodePageState extends State<ScanCodePage> {
     try {
       int positives = await _apiServices.checkQrCodeUrl(url);
 
-      String message;
+      String safetyMessage;
+      bool isSafe = false;
+
       if (positives > 2) {
-        message = "The URL is unsafe. Proceed with caution.";
+        safetyMessage = "The URL is unsafe. Proceed with caution.";
       } else if (positives == 1) {
-        message = "The URL is moderately safe.";
+        safetyMessage = "The URL is moderately safe.";
       } else {
-        message = "The URL is safe.";
-        
-        // Attempt to launch the URL
-        if (await canLaunchUrl(Uri.parse(url))) {
-          await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-        } else {
-          throw 'Could not launch $url';
-        }
+        safetyMessage = "The URL is safe.";
+        isSafe = true;
       }
 
-      setState(() {
-        _scanResultMessage = message;
-      });
+      // Show dialog with the result message and proceed option if safe
+      await _showSafetyDialog(context, Uri.parse(url), safetyMessage, isSafe);
 
     } catch (e) {
       setState(() {
         _scanResultMessage = "Error verifying URL: $e";
       });
     }
+  }
+
+  Future<void> _showSafetyDialog(BuildContext context, Uri uri, String message, bool isSafe) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('URL Safety Check'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            if (isSafe)
+              TextButton(
+                child: Text('Proceed to ${uri.toString()}'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Could not launch $uri")),
+                    );
+                  }
+                },
+              ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -63,7 +92,7 @@ class _ScanCodePageState extends State<ScanCodePage> {
           ),
           ElevatedButton(
             onPressed: () {
-              // Restart scanning by pushing a new instance of ScanCodePage
+              // Navigate to the HomeView
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(builder: (context) => const HomeView()),
               );
@@ -104,6 +133,9 @@ class _ScanCodePageState extends State<ScanCodePage> {
     );
   }
 }
+
+
+
 
 
 

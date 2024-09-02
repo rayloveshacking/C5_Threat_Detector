@@ -54,23 +54,37 @@ class _BlockedUrlsPageState extends State<BlockedUrlsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Blocked URLs'),
+        title: const Text(
+          'Blocked URLs',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 72, 78, 67),
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.grey[200], // Light gray background to match the theme
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _urlController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Enter URL to block',
                 hintText: 'https://example.com',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
               ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _addBlockedUrl,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[700], // Red button background
+                foregroundColor: Colors.white, // White text color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
               child: const Text('Add URL'),
             ),
             const SizedBox(height: 20),
@@ -82,7 +96,7 @@ class _BlockedUrlsPageState extends State<BlockedUrlsPage> {
                   return ListTile(
                     title: Text(url),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete),
+                      icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => _removeBlockedUrl(url),
                     ),
                   );
@@ -92,6 +106,13 @@ class _BlockedUrlsPageState extends State<BlockedUrlsPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _showRecommendationDialog,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[700], // Green button background
+                foregroundColor: Colors.white, // White text color
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
               child: const Text('Need more control?'),
             ),
           ],
@@ -100,6 +121,7 @@ class _BlockedUrlsPageState extends State<BlockedUrlsPage> {
     );
   }
 }
+
 
 
 

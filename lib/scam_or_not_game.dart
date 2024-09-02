@@ -27,7 +27,7 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
 
   void _generateAllUrls() {
     _allUrls.addAll([
-       {
+      {
     'url': 'https://www.google-support.com',
     'hint': 'Does this domain look official? Google rarely uses support-specific domains.',
     'explanation': 'Google-support.com is a phishing site attempting to mimic Google’s support pages.',
@@ -546,6 +546,7 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
     'explanation': 'Login.microsoftonline.com/verify is the legitimate page used by Microsoft for account verification.',
     'isScam': 'false',
   }
+      // Add your URLs here with isScam, hint, and explanation keys
     ]);
   }
 
@@ -622,9 +623,14 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fake or Real Game'),
+        title: const Text(
+          'Fake or Real Game',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 72, 78, 67),
       ),
-      body: Padding(
+      body: Container(
+        color: Colors.grey[200], // Light gray background to match the theme
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -649,10 +655,19 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => _checkAnswer(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[700], // Red button background
+                foregroundColor: Colors.white, // White text color
+              ),
               child: const Text('Fake'),
             ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => _checkAnswer(false),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[700], // Green button background
+                foregroundColor: Colors.white, // White text color
+              ),
               child: const Text('Real'),
             ),
             const SizedBox(height: 20),
@@ -676,6 +691,7 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
     );
   }
 }
+
 
 
 

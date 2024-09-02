@@ -7,7 +7,7 @@ import 'package:flutter_application_1/history.dart';
 
 class ScanCodePage extends StatefulWidget {
   final List<String> blockedUrls;
-  final List<ScanHistoryItem> scanHistory; // Added scanHistory parameter
+  final List<ScanHistoryItem> scanHistory;
 
   const ScanCodePage({required this.blockedUrls, required this.scanHistory, super.key});
 
@@ -109,8 +109,12 @@ class _ScanCodePageState extends State<ScanCodePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,  // Removes the back arrow
-        title: const Text('Scan QR Code'),
+        automaticallyImplyLeading: false, // Removes the back arrow
+        title: const Text(
+          'Scan QR Code',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 72, 78, 67),
         actions: [
           ElevatedButton(
             onPressed: () {
@@ -120,52 +124,67 @@ class _ScanCodePageState extends State<ScanCodePage> {
                         ScanCodePage(blockedUrls: widget.blockedUrls, scanHistory: widget.scanHistory)),
               );
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent, // Makes button background transparent
+              foregroundColor: Colors.red, // Changes the text color to red
+              elevation: 0, // Removes the shadow/elevation
+            ),
             child: const Text('Rescan'),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pushReplacement(
+              Navigator.of(context).pushAndRemoveUntil(
                 MaterialPageRoute(
-                    builder: (context) =>
-                        HomeView()), // Pass the blockedUrls to HomeView if needed
+                    builder: (context) => const HomeView()), // Pass the blockedUrls to HomeView if needed
+                (Route<dynamic> route) => false,
               );
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent, // Makes button background transparent
+              foregroundColor: Colors.red, // Changes the text color to red
+              elevation: 0, // Removes the shadow/elevation
+            ),
             child: const Text('LinkChecker'),
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: MobileScanner(
-              controller: MobileScannerController(
-                detectionSpeed: DetectionSpeed.noDuplicates,
-                returnImage: true,
-              ),
-              onDetect: (capture) {
-                final List<Barcode> barcodes = capture.barcodes;
-                for (final barcode in barcodes) {
-                  final url = barcode.rawValue ?? "";
-                  if (url.isNotEmpty) {
-                    _checkUrlSafety(url); // Pass the scanned URL to the VirusTotal check
+      body: Container(
+        color: Colors.grey[200], // Light gray background to match HomeView
+        child: Column(
+          children: [
+            Expanded(
+              child: MobileScanner(
+                controller: MobileScannerController(
+                  detectionSpeed: DetectionSpeed.noDuplicates,
+                  returnImage: true,
+                ),
+                onDetect: (capture) {
+                  final List<Barcode> barcodes = capture.barcodes;
+                  for (final barcode in barcodes) {
+                    final url = barcode.rawValue ?? "";
+                    if (url.isNotEmpty) {
+                      _checkUrlSafety(url); // Pass the scanned URL to the VirusTotal check
+                    }
                   }
-                }
-              },
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              _scanResultMessage,
-              style: const TextStyle(fontSize: 16.0),
-              textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                _scanResultMessage,
+                style: const TextStyle(fontSize: 16.0),
+                textAlign: TextAlign.center,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
+
+
 
 
 

@@ -163,9 +163,13 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('C5'),
+        title: const Text('C5 Threat Detector', style: TextStyle(
+    color: Colors.white
+  )),
+        backgroundColor: const Color.fromARGB(255, 72, 78, 67),
         actions: [
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.block),
             onPressed: () {
               Navigator.of(context).push(
@@ -174,6 +178,7 @@ class _HomeViewState extends State<HomeView> {
             },
           ),
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.history),
             onPressed: () {
               Navigator.of(context).push(
@@ -182,6 +187,7 @@ class _HomeViewState extends State<HomeView> {
             },
           ),
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.article),
             onPressed: () {
               Navigator.of(context).push(
@@ -191,58 +197,110 @@ class _HomeViewState extends State<HomeView> {
           ),
         ],
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Threat Detector',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: TextField(
-                controller: _linkController,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Enter URL',
-                  hintText: 'https://example.com',
+      body: Container(
+        color: Colors.grey[200], // Light gray background
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                'Welcome',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: verifyLink,
-              child: const Text('Verify URL'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => ScanCodePage(blockedUrls: _blockedUrls, scanHistory: _scanHistory)),
-                );
-              },
-              child: const Text('Scan QR Code'),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => ScamOrNotGame()),
-                );
-              },
-              child: const Text('Play Scam or Not'),
-            ),
-          ],
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: TextField(
+                  controller: _linkController,
+                  decoration: InputDecoration(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    labelText: 'Enter the link to verify',
+                    hintText: 'https://example.com',
+                    prefixIcon: Icon(Icons.link),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: verifyLink,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[700], // Red button background
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 50.0),
+                  minimumSize: const Size(200, 50), // Ensures all buttons have the same size
+                ),
+                child: const Text(
+                  'Verify your Link',
+                  style: TextStyle(
+                    color: Colors.white, // White text color
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('-OR-', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => ScanCodePage(blockedUrls: _blockedUrls, scanHistory: _scanHistory)),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[700], // Red button background
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 50.0),
+                  minimumSize: const Size(200, 50), // Ensures all buttons have the same size
+                ),
+                child: const Text(
+                  'Scan QR Code',
+                  style: TextStyle(
+                    color: Colors.white, // White text color
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('-OR-', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => ScamOrNotGame()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[700], // Red button background
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 50.0),
+                  minimumSize: const Size(200, 50), // Ensures all buttons have the same size
+                ),
+                child: const Text(
+                  'Play Game',
+                  style: TextStyle(
+                    color: Colors.white, // White text color
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
+
+
 
 
 

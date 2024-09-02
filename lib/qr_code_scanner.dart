@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter_application_1/apicalls.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_application_1/history.dart';
+import 'dart:async';  // Import for using Timer
 
 class ScanCodePage extends StatefulWidget {
   final List<String> blockedUrls;
@@ -17,18 +18,27 @@ class ScanCodePage extends StatefulWidget {
 
 class _ScanCodePageState extends State<ScanCodePage> {
   final ApiServices _apiServices = ApiServices();
+  final MobileScannerController _controller = MobileScannerController();
   String _scanResultMessage = "Scan a QR code to verify the URL.";
+  bool _isProcessing = false; // Flag to indicate if a QR code is being processed
+  Timer? _messageTimer;
 
   void _checkUrlSafety(String url) async {
+    if (_isProcessing) {
+      return;
+    }
+
+    _isProcessing = true;
+
     if (widget.blockedUrls.contains(url)) {
-      setState(() {
-        _scanResultMessage = "This URL is blocked and cannot be opened.";
-      });
+      _showTemporaryMessage("This URL is blocked and cannot be opened.");
+      _isProcessing = false;
       return;
     }
 
     try {
-      int positives = await _apiServices.checkQrCodeUrl(url);
+      final scanResult = await _apiServices.checkUrlVirusTotal(url);
+      int positives = scanResult['positives'] ?? 0;
 
       String safetyMessage;
       bool isSafe = false;
@@ -38,13 +48,11 @@ class _ScanCodePageState extends State<ScanCodePage> {
         safetyMessage = "Unsafe: The URL has been flagged by multiple sources.";
       } else if (positives == 1) {
         safetyPercentage = 80.0;
-        safetyMessage =
-            "Moderate: The URL has been flagged by one source. Safety: $safetyPercentage%";
+        safetyMessage = "Moderate: The URL has been flagged by one source. Safety: $safetyPercentage%";
         isSafe = true;
       } else {
         safetyPercentage = 100.0;
-        safetyMessage =
-            "Safe: The URL appears to be safe. Safety: $safetyPercentage%";
+        safetyMessage = "Safe: The URL appears to be safe. Safety: $safetyPercentage%";
         isSafe = true;
       }
 
@@ -58,9 +66,14 @@ class _ScanCodePageState extends State<ScanCodePage> {
 
       await _showSafetyDialog(context, Uri.parse(url), safetyMessage, isSafe);
     } catch (e) {
-      setState(() {
-        _scanResultMessage = "Error verifying URL: $e";
-      });
+      if (e.toString().contains('limit exceeded')) {
+        _showTemporaryMessage("Please try again later as the api only allow 4 requests per min.");
+      } else {
+        _showTemporaryMessage("Please try again later as the api only allow 4 requests per min.");
+      }
+    } finally {
+      _isProcessing = false;
+      _controller.start();
     }
   }
 
@@ -70,8 +83,7 @@ class _ScanCodePageState extends State<ScanCodePage> {
     });
   }
 
-  Future<void> _showSafetyDialog(
-      BuildContext context, Uri uri, String message, bool isSafe) async {
+  Future<void> _showSafetyDialog(BuildContext context, Uri uri, String message, bool isSafe) async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -90,6 +102,7 @@ class _ScanCodePageState extends State<ScanCodePage> {
                 child: Text('Proceed to ${uri.toString()}'),
                 onPressed: () async {
                   Navigator.of(context).pop();
+                  _saveToHistory(uri.toString(), true); // Ensure history is updated
                   if (await canLaunch(uri.toString())) {
                     await launch(uri.toString(), forceSafariVC: false, forceWebView: false);
                   } else {
@@ -105,6 +118,25 @@ class _ScanCodePageState extends State<ScanCodePage> {
     );
   }
 
+  void _showTemporaryMessage(String message) {
+    setState(() {
+      _scanResultMessage = message;
+    });
+    _messageTimer?.cancel(); // Cancel any previous timer
+    _messageTimer = Timer(Duration(seconds: 3), () {
+      setState(() {
+        _scanResultMessage = "Scan a QR code to verify the URL.";
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -118,31 +150,15 @@ class _ScanCodePageState extends State<ScanCodePage> {
         actions: [
           ElevatedButton(
             onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                    builder: (context) =>
-                        ScanCodePage(blockedUrls: widget.blockedUrls, scanHistory: widget.scanHistory)),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent, // Makes button background transparent
-              foregroundColor: Colors.red, // Changes the text color to red
-              elevation: 0, // Removes the shadow/elevation
-            ),
-            child: const Text('Rescan'),
-          ),
-          ElevatedButton(
-            onPressed: () {
               Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => const HomeView()), // Pass the blockedUrls to HomeView if needed
+                MaterialPageRoute(builder: (context) => const HomeView()),
                 (Route<dynamic> route) => false,
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent, // Makes button background transparent
-              foregroundColor: Colors.red, // Changes the text color to red
-              elevation: 0, // Removes the shadow/elevation
+              backgroundColor: Colors.transparent,
+              foregroundColor: Colors.red,
+              elevation: 0,
             ),
             child: const Text('LinkChecker'),
           ),
@@ -154,16 +170,13 @@ class _ScanCodePageState extends State<ScanCodePage> {
           children: [
             Expanded(
               child: MobileScanner(
-                controller: MobileScannerController(
-                  detectionSpeed: DetectionSpeed.noDuplicates,
-                  returnImage: true,
-                ),
+                controller: _controller,
                 onDetect: (capture) {
                   final List<Barcode> barcodes = capture.barcodes;
                   for (final barcode in barcodes) {
                     final url = barcode.rawValue ?? "";
-                    if (url.isNotEmpty) {
-                      _checkUrlSafety(url); // Pass the scanned URL to the VirusTotal check
+                    if (url.isNotEmpty && !_isProcessing) {
+                      _checkUrlSafety(url);
                     }
                   }
                 },
@@ -183,21 +196,3 @@ class _ScanCodePageState extends State<ScanCodePage> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

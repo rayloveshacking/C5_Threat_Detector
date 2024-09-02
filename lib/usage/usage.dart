@@ -11,14 +11,16 @@ class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
+  State<HomeView> createState() => HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class HomeViewState extends State<HomeView> {
   final TextEditingController _linkController = TextEditingController();
   final ApiServices _apiServices = ApiServices();
-  final List<String> _blockedUrls = []; // In-memory list of blocked URLs
-  final List<ScanHistoryItem> _scanHistory = [];  // To store scan history
+
+  // Static variables to persist data across widget rebuilds
+  static final List<String> _blockedUrls = [];
+  static final List<ScanHistoryItem> _scanHistory = [];
   static bool _dialogShown = false; // Use a static variable to track the dialog state
 
   @override
@@ -90,13 +92,11 @@ class _HomeViewState extends State<HomeView> {
         safetyMessage = "Unsafe: The URL has been flagged by multiple sources.";
       } else if (positives == 1) {
         safetyPercentage = 80.0;
-        safetyMessage =
-            "Moderate: The URL has been flagged by one source. Safety: $safetyPercentage%";
+        safetyMessage = "Moderate: The URL has been flagged by one source. Safety: $safetyPercentage%";
         isSafe = true;
       } else {
         safetyPercentage = 100.0;
-        safetyMessage =
-            "Safe: The URL appears to be safe. Safety: $safetyPercentage%";
+        safetyMessage = "Safe: The URL appears to be safe. Safety: $safetyPercentage%";
         isSafe = true;
       }
 
@@ -111,7 +111,11 @@ class _HomeViewState extends State<HomeView> {
       // Show dialog with the result message and proceed option if safe
       await _showSafetyDialog(context, Uri.parse(url), safetyMessage, isSafe);
     } catch (e) {
-      _showMessage("Error verifying URL: $e");
+      if (e.toString().contains('limit exceeded')) {
+        _showMessage("Please try again later as the api only allow 4 requests per min.");
+      } else {
+        _showMessage("Please try again later as the api only allow 4 requests per min.");
+      }
     }
   }
 
@@ -121,8 +125,7 @@ class _HomeViewState extends State<HomeView> {
     });
   }
 
-  Future<void> _showSafetyDialog(
-      BuildContext context, Uri uri, String message, bool isSafe) async {
+  Future<void> _showSafetyDialog(BuildContext context, Uri uri, String message, bool isSafe) async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
@@ -141,6 +144,9 @@ class _HomeViewState extends State<HomeView> {
                 child: Text('Proceed to ${uri.toString()}'),
                 onPressed: () async {
                   Navigator.of(context).pop();
+                  if (!_scanHistory.any((item) => item.url == uri.toString())) {
+                    _saveToHistory(uri.toString(), true);
+                  }
                   if (await canLaunch(uri.toString())) {
                     await launch(uri.toString(), forceSafariVC: false, forceWebView: false);
                   } else {
@@ -164,8 +170,8 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('C5 Threat Detector', style: TextStyle(
-    color: Colors.white
-  )),
+          color: Colors.white
+        )),
         backgroundColor: const Color.fromARGB(255, 72, 78, 67),
         actions: [
           IconButton(
@@ -204,7 +210,7 @@ class _HomeViewState extends State<HomeView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Welcome',
+                'Welcome!',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
@@ -299,23 +305,3 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

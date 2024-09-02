@@ -12,10 +12,21 @@ class ScanHistoryItem {
 }
 
 // Page to display the scan history
-class ScanHistoryPage extends StatelessWidget {
+class ScanHistoryPage extends StatefulWidget {
   final List<ScanHistoryItem> scanHistory;
 
-  const ScanHistoryPage({required this.scanHistory, Key? key}) : super(key: key);
+  const ScanHistoryPage({required this.scanHistory, super.key});
+
+  @override
+  _ScanHistoryPageState createState() => _ScanHistoryPageState();
+}
+
+class _ScanHistoryPageState extends State<ScanHistoryPage> {
+  void _deleteHistoryItem(int index) {
+    setState(() {
+      widget.scanHistory.removeAt(index);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +34,14 @@ class ScanHistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Scan History'),
       ),
-      body: scanHistory.isEmpty
+      body: widget.scanHistory.isEmpty
           ? const Center(
               child: Text('No scan history available.'),
             )
           : ListView.builder(
-              itemCount: scanHistory.length,
+              itemCount: widget.scanHistory.length,
               itemBuilder: (context, index) {
-                final item = scanHistory[index];
+                final item = widget.scanHistory[index];
                 return ListTile(
                   title: Text(
                     item.url,
@@ -43,32 +54,43 @@ class ScanHistoryPage extends StatelessWidget {
                   subtitle: Text(
                     'Result: ${item.isSafe ? 'Safe' : 'Unsafe'}\nScanned at: ${DateFormat('yyyy-MM-dd – kk:mm').format(item.timestamp)}',
                   ),
-                  trailing: item.isSafe
-                      ? const Icon(Icons.check_circle, color: Colors.green)
-                      : const Icon(Icons.warning, color: Colors.red),
-                  onTap: () async {
-                    if (item.isSafe) {
-                      final Uri uri = Uri.parse(item.url);
-                      if (await canLaunch(uri.toString())) {
-                        await launch(uri.toString(), forceSafariVC: false, forceWebView: false);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Could not launch ${item.url}")),
-                        );
-                      }
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("This URL is unsafe and cannot be opened.")),
-                      );
-                    }
-                  },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          _deleteHistoryItem(index);
+                        },
+                      ),
+                      if (item.isSafe)
+                        IconButton(
+                          icon: const Icon(Icons.check_circle, color: Colors.green),
+                          onPressed: () async {
+                            final Uri uri = Uri.parse(item.url);
+                            if (await canLaunch(uri.toString())) {
+                              await launch(uri.toString(), forceSafariVC: false, forceWebView: false);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text("Could not launch ${item.url}")),
+                              );
+                            }
+                          },
+                        ),
+                      if (!item.isSafe)
+                        IconButton(
+                          icon: const Icon(Icons.warning, color: Colors.red),
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("This URL is unsafe and cannot be opened.")),
+                            );
+                          },
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
     );
   }
 }
-
-
-
-

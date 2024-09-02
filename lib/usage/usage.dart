@@ -4,7 +4,7 @@ import 'package:flutter_application_1/blocked_urls.dart';
 import 'package:flutter_application_1/qr_code_scanner.dart';
 import 'package:flutter_application_1/scam_or_not_game.dart';
 import 'package:flutter_application_1/history.dart';
-import 'package:flutter_application_1/news.dart';  // Import ScamNewsPage
+import 'package:flutter_application_1/news.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends StatefulWidget {
@@ -19,6 +19,50 @@ class _HomeViewState extends State<HomeView> {
   final ApiServices _apiServices = ApiServices();
   final List<String> _blockedUrls = []; // In-memory list of blocked URLs
   final List<ScanHistoryItem> _scanHistory = [];  // To store scan history
+  static bool _dialogShown = false; // Use a static variable to track the dialog state
+
+  @override
+  void initState() {
+    super.initState();
+    // Show the dialog once when the HomeView is first loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_dialogShown) {
+        _showFakeLinkDialog();
+        _dialogShown = true; // Set to true after showing the dialog
+      }
+    });
+  }
+
+  void _showFakeLinkDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Beware of Fake Links!'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset('images/fake.png'),
+              const SizedBox(height: 20),
+              const Text(
+                'In the example, the myuniversity.edu/renewal URL was changed to myuniversity.edurenewal.com. Similarities between the two addresses offer the impression of a secure link, making the recipient less aware that an attack is taking place.',
+                style: TextStyle(fontSize: 16),
+                textAlign: TextAlign.left,
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Got it!'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void verifyLink() async {
     final String url = _linkController.text;
@@ -191,7 +235,7 @@ class _HomeViewState extends State<HomeView> {
                   MaterialPageRoute(builder: (context) => ScamOrNotGame()),
                 );
               },
-              child: const Text('Play Fake or Real'),
+              child: const Text('Play Scam or Not'),
             ),
           ],
         ),
@@ -199,6 +243,9 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 }
+
+
+
 
 
 

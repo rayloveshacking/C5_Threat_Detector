@@ -560,7 +560,6 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
   }
 
   void _checkAnswer(bool userSaidScam) async {
-    final currentUrl = _currentLevelUrls[_currentIndex]['url']!;
     final isScam = _currentLevelUrls[_currentIndex]['isScam'] == 'true';
 
     if (userSaidScam == isScam) {

@@ -123,7 +123,7 @@ class _ScanCodePageState extends State<ScanCodePage> {
       _scanResultMessage = message;
     });
     _messageTimer?.cancel(); // Cancel any previous timer
-    _messageTimer = Timer(Duration(seconds: 3), () {
+    _messageTimer = Timer(const Duration(seconds: 3), () {
       setState(() {
         _scanResultMessage = "Scan a QR code to verify the URL.";
       });

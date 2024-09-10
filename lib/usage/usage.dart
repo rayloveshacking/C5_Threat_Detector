@@ -197,7 +197,7 @@ class HomeViewState extends State<HomeView> {
             icon: const Icon(Icons.article),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => ScamNewsPage()),
+                MaterialPageRoute(builder: (context) => const ScamNewsPage()),
               );
             },
           ),
@@ -228,7 +228,7 @@ class HomeViewState extends State<HomeView> {
                     ),
                     labelText: 'Enter the link to verify',
                     hintText: 'https://example.com',
-                    prefixIcon: Icon(Icons.link),
+                    prefixIcon: const Icon(Icons.link),
                   ),
                 ),
               ),
@@ -280,7 +280,7 @@ class HomeViewState extends State<HomeView> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => ScamOrNotGame()),
+                    MaterialPageRoute(builder: (context) => const ScamOrNotGame()),
                   );
                 },
                 style: ElevatedButton.styleFrom(

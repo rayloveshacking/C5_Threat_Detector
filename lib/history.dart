@@ -82,7 +82,7 @@ class _ScanHistoryPageState extends State<ScanHistoryPage> {
                           icon: const Icon(Icons.warning, color: Colors.red),
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("This URL is unsafe and cannot be opened.")),
+                              const SnackBar(content: Text("This URL is unsafe and cannot be opened.")),
                             );
                           },
                         ),

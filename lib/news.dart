@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';  // Ensure this is imported
 
 class ScamNewsPage extends StatelessWidget {
-  const ScamNewsPage({Key? key}) : super(key: key);
+  const ScamNewsPage({super.key});
 
   @override
   Widget build(BuildContext context) {

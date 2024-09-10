@@ -572,7 +572,7 @@ class _ScamOrNotGameState extends State<ScamOrNotGame> {
       setState(() {
         _feedbackMessage =
             'Wrong! That URL is ${isScam ? 'a Scam' : 'Real'}.';
-        _feedbackMessage += '\n' + _currentLevelUrls[_currentIndex]['explanation']!;
+        _feedbackMessage += '\n${_currentLevelUrls[_currentIndex]['explanation']!}';
       });
     }
 

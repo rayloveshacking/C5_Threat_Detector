@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiServices {
-  final String virusTotalApiKey = '6a069caa09d1300a5b47aae22ec907668e171600b98c11cdf7fa1956ccf32fa0';
+  final String virusTotalApiKey = 'gg';
 
   // Function to check URL with VirusTotal
   Future<Map<String, dynamic>> checkUrlVirusTotal(String url) async {
